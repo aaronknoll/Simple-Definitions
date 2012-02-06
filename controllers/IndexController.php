@@ -1,5 +1,5 @@
 <?php
-class SimpleVocab_IndexController extends Omeka_Controller_Action
+class SimpleDefinitions_IndexController extends Omeka_Controller_Action
 {
     public function init()
     {
@@ -15,8 +15,8 @@ class SimpleVocab_IndexController extends Omeka_Controller_Action
     
     public function indexAction()
     {
-        $this->view->terms = $this->getTable('SimpleVocabTerm')->findAll();
-        $this->view->formSelectOptions = $this->_getFormSelectOptions();
+       // $this->view->terms = $this->getTable('SimpleVocabTerm')->findAll();
+       // $this->view->formSelectOptions = $this->_getFormSelectOptions();
     }
     
     public function editElementTermsAction()

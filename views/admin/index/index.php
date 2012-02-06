@@ -1,6 +1,6 @@
 <?php
-$head = array('bodyclass' => 'simple-vocab primary', 
-              'title' => 'Simple Vocab');
+$head = array('bodyclass' => 'definitions primary', 
+              'title' => 'Definitions');
 head($head);
 ?>
 <script type="text/javascript" charset="utf-8">
