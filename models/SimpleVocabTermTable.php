@@ -1,5 +1,5 @@
 <?php
-class SimpleVocabTermTable extends Omeka_Db_Table
+class SimpledefinitionsTermTable extends Omeka_Db_Table
 {
     public function findByElementId($elementId)
     {

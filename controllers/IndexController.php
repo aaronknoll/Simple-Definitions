@@ -15,8 +15,9 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
     
     public function indexAction()
     {
-       // $this->view->terms = $this->getTable('SimpleVocabTerm')->findAll();
-       // $this->view->formSelectOptions = $this->_getFormSelectOptions();
+       // $this->view->terms = $this->getTable('SimpledefinitionsTerm')->findAll();
+        //$this->view->formSelectOptions = $this->_getFormSelectOptions();
+		 $this->view->DefSelectOptions = $this->_getDefSelectOptions();
     }
     
     public function editElementTermsAction()
@@ -30,18 +31,18 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
             $this->redirect->goto('index');
         }
         
-        $simpleVocabTerm = $this->getTable('SimpleVocabTerm')->findByElementId($elementId);
+        $simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
         
         // Handle an existing term record.
-        if ($simpleVocabTerm) {
+        if ($simpledefinitionsTerm) {
              // Delete term record if there are no terms.
              if ('' == trim($terms)) {
-                 $simpleVocabTerm->delete();
-                 $this->flashSuccess('Successfully deleted the element\'s vocabulary terms.');
+                 $simpledefinitionsTerm->delete();
+                 $this->flashSuccess('Successfully deleted the element\'s definitionsulary terms.');
                  $this->redirect->goto('index');
              }
-             $simpleVocabTerm->terms = $this->_sanitizeTerms($terms);
-             $this->flashSuccess('Successfully edited the element\'s vocabulary terms.');
+             $simpledefinitionsTerm->terms = $this->_sanitizeTerms($terms);
+             $this->flashSuccess('Successfully edited the element\'s definitionsulary terms.');
         
         // Handle a new term record.
         } else {
@@ -49,12 +50,12 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
             if ('' == trim($terms)) {
                 $this->redirect->goto('index');
             }
-            $simpleVocabTerm = new SimpleVocabTerm;
-            $simpleVocabTerm->element_id = $elementId;
-            $simpleVocabTerm->terms = $this->_sanitizeTerms($terms);
-            $this->flashSuccess('Successfully added the element\'s vocabulary terms.');
+            $simpledefinitionsTerm = new SimpledefinitionsTerm;
+            $simpledefinitionsTerm->element_id = $elementId;
+            $simpledefinitionsTerm->terms = $this->_sanitizeTerms($terms);
+            $this->flashSuccess('Successfully added the element\'s definitionsulary terms.');
         }
-        $simpleVocabTerm->save();
+        $simpledefinitionsTerm->save();
         $this->redirect->goto('index');
     }
     
@@ -62,9 +63,9 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
     {
         $db = get_db();
         $elementId = $this->getRequest()->getParam('element_id');
-        $simpleVocabTerm = $this->getTable('SimpleVocabTerm')->findByElementId($elementId);
-        if ($simpleVocabTerm) {
-            $terms = $simpleVocabTerm->terms;
+        $simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
+        if ($simpledefinitionsTerm) {
+            $terms = $simpledefinitionsTerm->terms;
         } else {
             $terms = '';
         }
@@ -83,16 +84,41 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
                      ->order('count DESC');
         $elementTexts = $this->getTable('ElementText')->fetchObjects($select);
         
-        $simpleVocabTerm = $this->getTable('SimpleVocabTerm')->findByElementId($elementId);
-        if ($simpleVocabTerm) {
-            $terms = explode("\n", $simpleVocabTerm->terms);
+        $simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
+        if ($simpledefinitionsTerm) {
+            $terms = explode("\n", $simpledefinitionsTerm->terms);
         } else {
             $terms = array();
         }
         $this->view->elementTexts    = $elementTexts;
-        $this->view->simpleVocabTerm = $simpleVocabTerm;
+        $this->view->simpledefinitionsTerm = $simpledefinitionsTerm;
         $this->view->terms           = $terms;
     }
+	
+	private function _getDefSelectOptions()
+    {
+    	//TO-DO need to obtain the proper names for the item types
+        $db = get_db();
+        $select = $db->select()
+			->from('aas_omeka__simple_vocab_terms');
+	    $getallitems = $db->fetchAll($select);
+	  	$options = array('' => 'Select Below');
+		foreach ($getallitems as $singleitem)
+			{
+				$optGroup = $singleitem['element_id'] ? 'Item Type: ' . $singleitem['id'] : $singleitem['terms'];
+			    $termsArray = explode("\n", $singleitem['terms']);
+				//counter var, instantiate
+				$j = 0;
+				//okay, with $termsArray, let's make a select for each one
+				foreach ($termsArray as $terminarray)
+					{		
+					$options[$optGroup][$j] = $terminarray;
+					$j++;
+					}
+			}
+        return $options;
+    }
+    
     
     private function _getFormSelectOptions()
     {
@@ -113,19 +139,17 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
                      ->joinLeft(array('it' => $db->ItemType), 
                                 'ite.item_type_id = it.id', 
                                 array('item_type_name' => 'it.name'))
-                     ->joinLeft(array('svt' => $db->SimpleVocabTerm), 
+                     ->joinLeft(array('svt' => $db->SimpledefinitionsTerm), 
                                 'e.id = svt.element_id', 
-                                array('simple_vocab_term_id' => 'svt.id'))
+                                array('simple_definitions_term_id' => 'svt.id'))
                      ->where('rt.name = "All" OR rt.name = "Item"')
                      ->order(array('es.name', 'it.name', 'e.name'));
         $elements = $db->fetchAll($select);
         $options = array('' => 'Select Below');
         foreach ($elements as $element) {
-            $optGroup = $element['item_type_name'] 
-                      ? 'Item Type: ' . $element['item_type_name'] 
-                      : $element['element_set_name'];
+            $optGroup = $element['item_type_name'] ? 'Item Type: ' . $element['item_type_name']   : $element['element_set_name'];
             $value = $element['element_name'];
-            if ($element['simple_vocab_term_id']) {
+            if ($element['simple_definitions_term_id']) {
                 $value .= ' *';
             }
             $options[$optGroup][$element['element_id']] = $value;
@@ -133,6 +157,16 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
         return $options;
     }
     
+	private function _sanitizeDefListandReturnArray($deflist)
+	{
+		//the result is an array!!!
+	    $termsArr = explode("\n", $deflist);
+        $termsArr = array_map('trim', $termsArr);// trim all values
+        $termsArr = array_filter($termsArr); // remove empty values
+        $termsArr = array_unique($termsArr); // remove duplicate values	
+	    return $termsArr;
+	}
+	
     private function _sanitizeTerms($terms)
     {
         $termsArr = explode("\n", $terms);
@@ -143,4 +177,5 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
         $terms = trim($terms);
         return $terms;
     }
+
 }

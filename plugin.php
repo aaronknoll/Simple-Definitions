@@ -68,16 +68,16 @@ class SimpleDef_Controller_Plugin_SelectFilter extends Zend_Controller_Plugin_Ab
         
         // Allow plugins to add routes that contain form inputs rendered by 
         // Omeka_View_Helper_ElementForm::_displayFormInput().
-        $routes = apply_filters('simple_vocab_routes', $routes);
+        $routes = apply_filters('simple_definitions_routes', $routes);
         
         // Apply filters to defined routes.
         foreach ($routes as $route) {
             if ($route['module'] === $module 
              && $route['controller'] === $controller 
              && in_array($action, $route['actions'])) {
-                $simpleVocabTerms = $db->getTable('SimpleVocabTerm')->findAll();
-                foreach ($simpleVocabTerms as $simpleVocabTerm) {
-                    $element = $db->getTable('Element')->find($simpleVocabTerm->element_id);
+                $simpledefinitionsTerms = $db->getTable('SimpledefinitionsTerm')->findAll();
+                foreach ($simpledefinitionsTerms as $simpledefinitionsTerm) {
+                    $element = $db->getTable('Element')->find($simpledefinitionsTerm->element_id);
                     $elementSet = $db->getTable('ElementSet')->find($element->element_set_id);
                     add_filter(array('Form', 
                                      'Item', 
@@ -97,12 +97,13 @@ class SimpleDef_Controller_Plugin_SelectFilter extends Zend_Controller_Plugin_Ab
                                     $record, $element)
     {
         $db = get_db();
-        $simpleVocabTerm = $db->getTable('SimpleVocabTerm')->findByElementId($element->id);
-        $terms = explode("\n", $simpleVocabTerm->terms);
+        $simpledefinitionsTerm = $db->getTable('SimpledefinitionsTerm')->findByElementId($element->id);
+        $terms = explode("\n", $simpledefinitionsTerm->terms);
         $selectTerms = array('' => 'Select Below') + array_combine($terms, $terms);
         return __v()->formSelect($inputNameStem . '[text]',
                                  $value,
                                  $options,
                                  $selectTerms);
     }
+	
 }

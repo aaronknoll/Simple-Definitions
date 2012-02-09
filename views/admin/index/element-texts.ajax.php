@@ -9,7 +9,7 @@
     </tr>
     <?php foreach ($this->elementTexts as $elementText):
         $warnings = array();
-        if ($this->simpleVocabTerm && !in_array($elementText->text, $this->terms)) $warnings[] = 'Not in vocabulary.';
+        if ($this->simpledefinitionsTerm && !in_array($elementText->text, $this->terms)) $warnings[] = 'Not in definitionsulary.';
         if (100 < strlen($elementText->text)) $warnings[] = 'Long text.';
         if (strstr($elementText->text, "\n")) $warnings[] = 'Contains newlines.';
         ?>
