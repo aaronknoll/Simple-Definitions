@@ -41,9 +41,9 @@ jQuery(window).load(function () {
                        null, 
                         $this->DefSelectOptions) ?>
 
-                <p class="explanation">Select an element to manage its custom 
-                definitionsulary. Elements with a custom definitionsulary are marked with an 
-                asterisk (*).</p>
+                <p class="explanation">Select a controlled vocabulary field
+                	to define a term. Terms with existing definitions
+                	are **starred**. </p>
             </div>
         </div>
         <div class="field">
@@ -54,29 +54,14 @@ jQuery(window).load(function () {
                                                array('id' => 'terms', 
                                                      'rows' => '10', 
                                                      'cols' => '50')) ?>
-                <p class="explanation">Enter the custom definitionsulary terms for 
-                this element, one per line. To delete the definitionsulary, simply 
-                remove the terms and sumbit this form.</p>
+                <p class="explanation">Enter new text, edit existing text
+                	or delete all content (and save a blank box) to 
+                	delete an item.</p>
             </div>
         </div>
         <?php echo $this->formSubmit('edit_definitions', 
-                                     'Add/Edit definitionsulary', 
+                                     'Add/Edit a Definition', 
                                      array('class' => 'submit submit-large')); ?>
     </form>
-    <p><a id="display-texts" href="#display-texts"><strong>Click here</strong></a> 
-    to display a list of texts for the selected element that currently exist in 
-    your archive. You may use this list as a reference to build a definitionsulary, 
-    but be aware of some caveats:</p>
-    <ul style="list-style: disc;margin-left: 1.5em;">
-        <li>definitionsulary terms must not contain newlines (line breaks).</li>
-        <li>definitionsulary terms are typically short and concise. If your existing 
-        texts are otherwise, avoid using a controlled definitionsulary for this 
-        element.</li>
-        <li>definitionsulary terms must be identical to their corresponding texts.</li>
-        <li>Existing texts that are not in the definitionsulary will be preserved — 
-        however, they cannot be selected in the item edit page, and will be 
-        deleted once you save the item.</li>
-    </ul>
-    <div id="texts"></div>
 </div>
 <?php foot(); ?>
