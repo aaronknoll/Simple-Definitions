@@ -6,10 +6,10 @@ head($head);
 <script type="text/javascript" charset="utf-8">
 //<![CDATA[
 jQuery(window).load(function () {
-    jQuery('#element-id').change(function() {
+    jQuery('#defList').change(function() {
         jQuery.ajax({
             url: <?php echo js_escape(uri(array('action' => 'element-terms'))); ?>,
-            data: {element_id: jQuery('#element-id').val()},
+            data: {defList: jQuery('#defList').val()},
             success: function(data) {
                 jQuery('#terms').val(data);
             }
@@ -34,18 +34,13 @@ jQuery(window).load(function () {
                                                      'controller' => 'index', 
                                                      'action' => 'edit-element-terms')); ?>">
         <div class="field">
-            <label for="element-id">Element</label>
+            <label for="defList">Word to Define</label>
             <div class="inputs">
-               <?php echo $this->formSelect('aaronlist', 
+               <?php echo $this->formSelect('defList', 
                        null, 
                        null, 
                         $this->DefSelectOptions) ?>
-             
-             
-                <?php echo $this->formSelect('element_id', 
-                                             null, 
-                                             array('id' => 'element-id'), 
-                                             $this->formSelectOptions) ?>
+
                 <p class="explanation">Select an element to manage its custom 
                 definitionsulary. Elements with a custom definitionsulary are marked with an 
                 asterisk (*).</p>

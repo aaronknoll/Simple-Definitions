@@ -15,7 +15,7 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
     
     public function indexAction()
     {
-       // $this->view->terms = $this->getTable('SimpledefinitionsTerm')->findAll();
+         //$this->view->terms = $this->getTable('SimpledefinitionsTerm')->findAll();
         //$this->view->formSelectOptions = $this->_getFormSelectOptions();
 		 $this->view->DefSelectOptions = $this->_getDefSelectOptions();
     }
@@ -23,65 +23,104 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
     public function editElementTermsAction()
     {
         $db = get_db();
-        $elementId = $this->getRequest()->getParam('element_id');
-        $terms = $this->getRequest()->getParam('terms');
+		//get the form fields:
+        $elementId = $this->getRequest()->getParam('defList');
+      	$terms = $this->getRequest()->getParam('terms');
+		//$elementId = $elemName;
+		//$terms		=	$elemDef;
+		
+		echo ''. $elementId .''. $terms .'';
+		//exit();
+        //and if there is none, just go back to index.
+		if ('' == $elementId) { $this->redirect->goto('index');}
         
-        // Don't process the empty element select option.
-        if ('' == $elementId) {
-            $this->redirect->goto('index');
-        }
-        
-        $simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
+		if($terms)
+			{
+				//if we have a term, let's figure out what to do with it	
+
+				//INSERT /update A NEW TERM
+				$data = array(
+					'def_term'	=> $elementId,
+					'definitions' => $terms
+				);
+				$db->insert('simple_definitions', $data);
+				$this->flashSuccess('Definition Was Successfully Added to DB');
+				$this->redirect->goto('index');	
+	
+			}
+		elseif ($terms = '')
+			{
+		
+				
+			}
+		else 
+			{
+				 $db->delete(''. $db->prefix .'simple_definitions', 'def_term = "'. $elementId .'"');
+				 $this->flashSuccess(''. $elementId .'There was nothing, so we did nothing');
+				//and if there was no term... well then we shan't do a thing. 
+				 $this->redirect->goto('index');
+			}
+
+
+		
+        //$simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
         
         // Handle an existing term record.
-        if ($simpledefinitionsTerm) {
+        //if ($simpledefinitionsTerm) {
              // Delete term record if there are no terms.
-             if ('' == trim($terms)) {
-                 $simpledefinitionsTerm->delete();
-                 $this->flashSuccess('Successfully deleted the element\'s definitionsulary terms.');
-                 $this->redirect->goto('index');
-             }
-             $simpledefinitionsTerm->terms = $this->_sanitizeTerms($terms);
-             $this->flashSuccess('Successfully edited the element\'s definitionsulary terms.');
+            // if ('' == trim($terms)) {
+             //    $simpledefinitionsTerm->delete();
+            //     $this->flashSuccess('Successfully deleted the element\'s definitionsulary terms.');
+            //     $this->redirect->goto('index');
+            // }
+             //$simpledefinitionsTerm->terms = $this->_sanitizeTerms($terms);
+             //$this->flashSuccess('Successfully edited the element\'s definitionsulary terms.');
         
         // Handle a new term record.
-        } else {
+       // } else {
             // Do not save a new term record without terms.
-            if ('' == trim($terms)) {
-                $this->redirect->goto('index');
-            }
-            $simpledefinitionsTerm = new SimpledefinitionsTerm;
-            $simpledefinitionsTerm->element_id = $elementId;
-            $simpledefinitionsTerm->terms = $this->_sanitizeTerms($terms);
-            $this->flashSuccess('Successfully added the element\'s definitionsulary terms.');
-        }
-        $simpledefinitionsTerm->save();
-        $this->redirect->goto('index');
+           // if ('' == trim($terms)) {
+            //    $this->redirect->goto('index');
+            //}
+            //$simpledefinitionsTerm = new SimpledefinitionsTerm;
+            //$simpledefinitionsTerm->element_id = $elementId;
+            //$simpledefinitionsTerm->terms = $this->_sanitizeTerms($terms);
+            //$this->flashSuccess('Successfully added the element\'s definitionsulary terms.');
+       // }
+       // $simpledefinitionsTerm->save();
+       // $this->redirect->goto('index');
     }
     
     public function elementTermsAction()
     {
+    	//invoked on the dropdown.....
         $db = get_db();
-        $elementId = $this->getRequest()->getParam('element_id');
-        $simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
-        if ($simpledefinitionsTerm) {
-            $terms = $simpledefinitionsTerm->terms;
-        } else {
-            $terms = '';
-        }
-        $this->view->terms = $terms;
+	    $elementId = $this->getRequest()->getParam('defList');
+      	//$terms = $this->getRequest()->getParam('terms');
+      //  $elementId = $this->getRequest()->getParam('defList');
+		$findrowDef	= $db->fetchRow('SELECT definitions FROM '. $db->prefix .'simple_definitions WHERE def_term = "'. $elementId .'"');
+		//$ourdef	=	$findrowDef[0];
+
+       // if ($simpledefinitionsTerm) {
+       //     $terms = $simpledefinitionsTerm->terms;
+       // } else {
+       //     $terms = '';
+        //}
+       // $this->view->terms = $terms;
+       $this->view->terms = $findrowDef[definitions];
     }
     
     public function elementTextsAction()
     {
         $db = get_db();
         $elementId = $this->getRequest()->getParam('element_id');
-        $select = $db->select()
-                     ->from(array('et' => $db->ElementText), 
-                            array('text', 'COUNT(*) AS count'))
-                     ->group('text')
-                     ->where('element_id = ?', $elementId)
-                     ->order('count DESC');
+       // $select = $db->select()
+       //              ->from('aas_omeka__simple_definitions')
+        //             ->where('def_term = ?', $elementId);
+		//$isthereadef = $db->fetchAll($select);
+		//echo "$isthereadef";
+		//exit();
+
         $elementTexts = $this->getTable('ElementText')->fetchObjects($select);
         
         $simpledefinitionsTerm = $this->getTable('SimpledefinitionsTerm')->findByElementId($elementId);
@@ -100,7 +139,7 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
     	//TO-DO need to obtain the proper names for the item types
         $db = get_db();
         $select = $db->select()
-			->from('aas_omeka__simple_vocab_terms');
+			->from(''. $db->prefix .'simple_vocab_terms');
 	    $getallitems = $db->fetchAll($select);
 	  	$options = array('' => 'Select Below');
 		foreach ($getallitems as $singleitem)
@@ -111,8 +150,23 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
 				$j = 0;
 				//okay, with $termsArray, let's make a select for each one
 				foreach ($termsArray as $terminarray)
-					{		
-					$options[$optGroup][$j] = $terminarray;
+					{
+					$options[$optGroup][$terminarray] = $terminarray;
+					
+					$findrowDef	= $db->fetchRow('SELECT definitions FROM '. $db->prefix .'simple_definitions WHERE def_term = "'. $terminarray .'"');		
+					//this little wonky bracket set of code appends stars
+					// to make it easy to see which words have definitions
+					if($findrowDef)
+						{
+							$options[$optGroup][$terminarray] = " ** ";
+							$options[$optGroup][$terminarray] .= $terminarray;
+							$options[$optGroup][$terminarray] .= " ** ";
+						}
+					else 
+						{
+							$options[$optGroup][$terminarray] = $terminarray;
+						}
+
 					$j++;
 					}
 			}
@@ -157,6 +211,14 @@ class SimpleDefinitions_IndexController extends Omeka_Controller_Action
         return $options;
     }
     
+	public function findByElementId($elementId)
+    {
+    	exit();
+        $select = $this->getSelect()->where('def_term; = ?', $elementId);
+        //return $this->fetchObject($select);
+        return $elementId;
+    }
+
 	private function _sanitizeDefListandReturnArray($deflist)
 	{
 		//the result is an array!!!
